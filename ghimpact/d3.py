@@ -10,48 +10,17 @@ import yaml
 import click
 
 
-# Hardcoded meanings
-IRIS_HEP = {
-    "scikit-hep",
-    "zfit",
-    "GooFit",
-    "CoffeaTeam",
-    "opensciencegrid",
-}
-
-PHYSICS = {
-    "lhcb",
-    "xrootd",
-    "root-project",
-    "UCATLAS",
-    "HSF",
-}
-
-OUTSIDE = {
-    "pybind",
-    "google",
-    "numba",
-    "pre-commit",
-    "binder-examples",
-    "python",
-    "executablebooks",
-    "Homebrew",
-    "pypa",
-    "carpendries",
-    "jupyterhub",
-    "conda-forge",
-    "matplotlib",
-    "tensorflow",
-    "silkeh",
-}
-
-ALL = IRIS_HEP | PHYSICS | OUTSIDE
-
-
 @click.command(help="Convert a set of YAML file into a json file for d3")
 @click.argument("input_files", type=click.File("r"), nargs=-1)
+@click.option("--options", type=click.File("r"))
 @click.option("--output", type=click.File("w"), default="-")
-def d3(input_files, output):
+def d3(input_files, options, output):
+
+    opts = yaml.safe_load(options)
+    cats = opts["categories"]
+    all_orgs = set(org for cat in cats for org in cat["orgs"])
+    filter_repo = set(opts["repos"]) if "repos" in opts else set()
+
     h = hist.Hist(
         hist.axis.StrCategory([], growth=True, name="author"),
         hist.axis.StrCategory([], growth=True, name="org_repo"),
@@ -68,7 +37,7 @@ def d3(input_files, output):
         org = (pr["repository_url"].split("/")[-2] for pr in data)
         repo = (pr["repository_url"].split("/")[-1] for pr in data)
 
-        org_repo = [f"{o}:{r}" for o, r in zip(org, repo) if o in ALL]
+        org_repo = [f"{o}:{r}" for o, r in zip(org, repo) if o in all_orgs]
 
         h.fill(
             author=author_file.stem,
@@ -80,14 +49,12 @@ def d3(input_files, output):
 
     for org_repo in h.axes["org_repo"]:
         org = org_repo.split(":")[0]
-        if org in IRIS_HEP:
-            group = 1
-        elif org in PHYSICS:
-            group = 2
-        elif org in OUTSIDE:
-            group = 3
+        for cat in cats:
+            if org in cat["orgs"]:
+                group = cat["value"]
+                break
         else:
-            raise ValueError(f"That can't happen, {org} is already filtered!")
+             raise ValueError(f"That can't happen, {org} is already filtered!")
 
         nodes.append(dict(id=org_repo, group=group))
 
@@ -104,7 +71,7 @@ def d3(input_files, output):
 
         for author in h.axes["author"]:
             if (res1 := h[author, a]) > 0 and (res2 := h[author, b] > 0):
-                lh.fill(source=a, target=b, weight=min(res1, res2))
+                lh.fill(source=a, target=b, weight=res1*res2)
 
     print("Filled links histogram")
 

@@ -1,0 +1,41 @@
+
+categories:
+- value: 1
+  name: IRIS-HEP
+  orgs:
+  - scikit-hep
+  - zfit
+  - GooFit
+  - CoffeaTeam
+  - opensciencegrid
+
+- value: 2
+  name: Physics
+  orgs:
+  - lhcb
+  - xrootd
+  - root-project
+  - UCATLAS
+  - HSF
+
+- value: 3
+  name: Ecosystem
+  orgs:
+  - pybind
+  - google
+  - numba
+  - pre-commit
+  - binder-examples
+  - python
+  - executablebooks
+  - Homebrew
+  - pypa
+  - carpendries
+  - jupyterhub
+  - matplotlib
+  - tensorflow
+  - silkeh
+
+# If this is present, filter by this
+# repos:
+
