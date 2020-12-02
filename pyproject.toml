@@ -1,0 +1,21 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "ghimpact"
+version = "0.1.0"
+description = "A package for measuring GitHub user impact via PRs"
+authors = ["Henry Schreiner <henryschreineriii@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+click = "^7.0.0"
+requests = "^2.20.0"
+PyYAML = "^5.0.0"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.scripts]
+ghimpact = 'ghimpact.__main__:main'
