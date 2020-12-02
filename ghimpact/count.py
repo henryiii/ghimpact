@@ -2,7 +2,7 @@
 
 from typing import List, Dict, Any
 
-import boost_histogram as bh
+import hist
 import yaml
 import click
 
@@ -18,23 +18,23 @@ def sort_count(h1):
 def count(input_file, output):
     data: List[Dict[str, Any]] = yaml.safe_load(input_file)
 
-    h = bh.Histogram(
-        bh.axis.StrCategory([], growth=True),
-        bh.axis.StrCategory([], growth=True),
-        storage=bh.storage.Int64()
+    h = hist.Hist(
+        hist.axis.StrCategory([], growth=True, name="org"),
+        hist.axis.StrCategory([], growth=True, name="repo"),
+        storage=hist.storage.Int64()
     )
 
     h.fill(
-        [pr["repository_url"].split("/")[-2] for pr in data],
-        [pr["repository_url"].split("/")[-1] for pr in data],
+        org=[pr["repository_url"].split("/")[-2] for pr in data],
+        repo=[pr["repository_url"].split("/")[-1] for pr in data],
     )
 
-    org_totals = h[:, sum]
+    org_totals = h.project("org")
 
     for k, v in sort_count(org_totals):
         print(k, v, sep=":", end=" - ", file=output)
         
-        strs = (f"{repo}({c})" for repo, c in sort_count(h[bh.loc(k),:]))
+        strs = (f"{repo}({c})" for repo, c in sort_count(h[k,:]))
         print(*strs, sep=", ", file=output)
 
 
