@@ -17,6 +17,7 @@ PyYAML = "^5.0.0"
 hist = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
+ipython = "^7.19.0"
 
 [tool.poetry.scripts]
 ghimpact = 'ghimpact.__main__:main'

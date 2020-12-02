@@ -10,17 +10,19 @@ import yaml
 import click
 
 
-def get_items(user, start_date, page: int = 0)-> List[Dict[str, Any]]:
+def get_items(user, start_date, page: int = 0) -> List[Dict[str, Any]]:
     "Run with 0 to get and combine all pages."
 
     base = "https://api.github.com/search/issues"
 
-    query = "+".join([
-        "is:pull-request",
-        f"author:{user}",
-        f"created:>{start_date}",
-        "is:merged",
-    ])
+    query = "+".join(
+        [
+            "is:pull-request",
+            f"author:{user}",
+            f"created:>{start_date}",
+            "is:merged",
+        ]
+    )
 
     params = dict(
         q=query,
@@ -49,10 +51,18 @@ def get_items(user, start_date, page: int = 0)-> List[Dict[str, Any]]:
 
     return results
 
+
 @click.command(help="Collect a user's PRs and produce YAML")
-@click.option("--output", type=click.File("w"), default="-", help="Optional output file, stdout otherwise")
+@click.option(
+    "--output",
+    type=click.File("w"),
+    default="-",
+    help="Optional output file, stdout otherwise",
+)
 @click.option("--user", prompt="Username", help="Username to run on")
-@click.option("--start-date", default="2019-03-01", help="Only consider PRs after this date")
+@click.option(
+    "--start-date", default="2019-03-01", help="Only consider PRs after this date"
+)
 def get(output, user, start_date):
     items = get_items(user, start_date)
     print(yaml.dump(items, default_flow_style=False), file=output)

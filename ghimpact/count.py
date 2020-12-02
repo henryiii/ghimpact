@@ -21,7 +21,7 @@ def count(input_file, output):
     h = hist.Hist(
         hist.axis.StrCategory([], growth=True, name="org"),
         hist.axis.StrCategory([], growth=True, name="repo"),
-        storage=hist.storage.Int64()
+        storage=hist.storage.Int64(),
     )
 
     h.fill(
@@ -33,8 +33,8 @@ def count(input_file, output):
 
     for k, v in sort_count(org_totals):
         print(k, v, sep=":", end=" - ", file=output)
-        
-        strs = (f"{repo}({c})" for repo, c in sort_count(h[k,:]))
+
+        strs = (f"{repo}({c})" for repo, c in sort_count(h[k, :]))
         print(*strs, sep=", ", file=output)
 
 
