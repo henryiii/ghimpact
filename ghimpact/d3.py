@@ -19,7 +19,7 @@ def d3(input_files, options, output):
     opts = yaml.safe_load(options)
     cats = opts["categories"]
     all_orgs = set(org for cat in cats for org in cat["orgs"])
-    filter_repo = set(opts["repos"]) if "repos" in opts else set()
+    filter_repos = set(opts["repos"]) if "repos" in opts else set()
 
     h = hist.Hist(
         hist.axis.StrCategory([], growth=True, name="author"),
@@ -37,7 +37,7 @@ def d3(input_files, options, output):
         org = (pr["repository_url"].split("/")[-2] for pr in data)
         repo = (pr["repository_url"].split("/")[-1] for pr in data)
 
-        org_repo = [f"{o}:{r}" for o, r in zip(org, repo) if o in all_orgs]
+        org_repo = [f"{o}:{r}" for o, r in zip(org, repo) if o in all_orgs and (not filter_repos or r in filter_repos)]
 
         h.fill(
             author=author_file.stem,
@@ -68,10 +68,9 @@ def d3(input_files, options, output):
     )
 
     for a, b in itertools.combinations(nodes_ids, 2):
-
         for author in h.axes["author"]:
             if (res1 := h[author, a]) > 0 and (res2 := h[author, b] > 0):
-                lh.fill(source=a, target=b, weight=res1*res2)
+                lh.fill(source=a, target=b)
 
     print("Filled links histogram")
 

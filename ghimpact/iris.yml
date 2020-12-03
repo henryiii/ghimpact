@@ -24,11 +24,9 @@ categories:
   - pybind
   - google
   - numba
-  - pre-commit
   - binder-examples
   - python
   - executablebooks
-  - Homebrew
   - pypa
   - carpendries
   - jupyterhub
@@ -37,5 +35,24 @@ categories:
   - silkeh
 
 # If this is present, filter by this
-# repos:
-
+repos_disabled:
+- awkward-1.0
+- awkward-0.x
+- boost-histogram
+- uproot3
+- uproot4
+- particle
+- decaylanguage
+- CPython
+- Numba
+- matplotlib
+- pybind11
+- cibuildwheel
+- zfit
+- pyjet
+- mplhep
+- xrootd
+- coffea
+- mypy
+- jupyter-book
+- root
