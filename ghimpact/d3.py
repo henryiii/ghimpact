@@ -44,9 +44,21 @@ def d3(input_files, options, output):
             org_repo=org_repo,
         )
 
-    nodes = []
-    links = []
+    nodes = get_nodes(h)
+    print(f"Built nodes list with {len(nodes)} nodes")
 
+    links = get_people_links(h, nodes)
+    print("Filled links histogram")
+
+    out_dict = dict(nodes=nodes, links=links)
+    j = json.dumps(out_dict, sort_keys=True, indent=2)
+    print(j, file=output)
+
+    print("Finished")
+
+
+def nodes(h: hist.Hist) -> List[str]:
+    nodes = []
     for org_repo in h.axes["org_repo"]:
         org = org_repo.split(":")[0]
         for cat in cats:
@@ -58,9 +70,13 @@ def d3(input_files, options, output):
 
         nodes.append(dict(id=org_repo, group=group))
 
-    print(f"Built nodes list with {len(nodes)} nodes", file=sys.stderr)
+    return nodes
 
+
+
+def get_people_links(h: hist.Hist, nodes: List[str]) -> List[str]:
     nodes_ids = [v["id"] for v in nodes]
+
     lh = hist.Hist(
         hist.axis.StrCategory(nodes_ids, name="source"),
         hist.axis.StrCategory(nodes_ids, name="target"),
@@ -72,17 +88,14 @@ def d3(input_files, options, output):
             if (res1 := h[author, a]) > 0 and (res2 := h[author, b] > 0):
                 lh.fill(source=a, target=b)
 
-    print("Filled links histogram")
-
     for source in lh.axes["source"]:
         for target in lh.axes["target"]:
             if (value := lh[source, target]) > 0:
                 links.append(dict(source=source, target=target, value=value))
 
-    out_dict = dict(nodes=nodes, links=links)
-    j = json.dumps(out_dict, sort_keys=True, indent=2)
-    print(j, file=output)
-    print("Finished")
+    return links
+
+
 
 
 if __name__ == "__main__":
