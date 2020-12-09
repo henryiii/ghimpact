@@ -15,6 +15,7 @@ click = "^7.0.0"
 requests = "^2.20.0"
 PyYAML = "^5.0.0"
 hist = "^2.0.1"
+PyGithub = "^1.54"
 
 [tool.poetry.dev-dependencies]
 ipython = "^7.19.0"

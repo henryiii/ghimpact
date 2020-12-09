@@ -1,55 +1,30 @@
 #!/usr/bin/env python3
 
-import requests
 import json
 import math
 import sys
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Optional
 from datetime import datetime
 import yaml
 import click
+from github import Github
 
 
-def get_items(user, start_date, page: int = 0) -> List[Dict[str, Any]]:
+def get_items(user, start_date, auth: Optional[str] = None) -> List[Dict[str, Any]]:
     "Run with 0 to get and combine all pages."
 
-    base = "https://api.github.com/search/issues"
+    gh = Github(auth)
+    gh.per_page = 100
 
-    query = "+".join(
-        [
-            "is:pull-request",
-            f"author:{user}",
-            f"created:>{start_date}",
-            "is:merged",
-        ]
-    )
-
-    params = dict(
-        q=query,
-        per_page=100,
-        page=page or 1,
+    issues = gh.search_issues(
+        "is:pull-request is:merged",
         sort="updated",
         order="asc",
+        author=user,
+        created=f">{start_date}",
     )
 
-    query_str = base + "?" + "&".join(f"{k}={v}" for k, v in params.items())
-
-    obj = requests.get(query_str)
-    j = json.loads(obj.content)
-    try:
-        total_count = j["total_count"]
-        results = j["items"]
-    except KeyError:
-        print(j)
-        raise
-
-    if page == 0 and total_count > 100:
-        total = int(math.ceil(total_count / 100))
-        for i in range(2, total + 1):
-            print(f"Loading page {i} of {total}", file=sys.stderr)
-            results += get_items(user, start_date, i)
-
-    return results
+    return list(issue._rawData for issue in issues)
 
 
 @click.command(help="Collect a user's PRs and produce YAML")
@@ -63,8 +38,9 @@ def get_items(user, start_date, page: int = 0) -> List[Dict[str, Any]]:
 @click.option(
     "--start-date", default="2019-03-01", help="Only consider PRs after this date"
 )
-def get(output, user, start_date):
-    items = get_items(user, start_date)
+@click.option("--auth", help="A token to use to authenticate")
+def get(output, user, start_date, auth):
+    items = get_items(user, start_date, auth)
     print(yaml.dump(items, default_flow_style=False), file=output)
 
 
